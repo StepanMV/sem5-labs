@@ -1,12 +1,7 @@
-.PHONY: all clean run
-TARGET = ls
-SRCS = ls.c
+.PHONY: all clean
 
 all:
-	gcc $(SRCS) -o $(TARGET)
+	gcc myls.c -o myls
 
 clean:
-	rm -f *.o $(TARGET)
-
-run: $(TARGET)
-	./$(TARGET)
+	rm -f *.o myls
