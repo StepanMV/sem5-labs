@@ -1,3 +1,9 @@
+.vscode
+
+*
+!/**/
+!*.*
+
 # Prerequisites
 *.d
 
