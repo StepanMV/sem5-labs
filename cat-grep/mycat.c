@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
     int number_nonempty_lines = 0;
 
     
-    while ((opt = getopt(argc, argv, "nbe")) != -1) {
+    while ((opt = getopt(argc, argv, "nbE")) != -1) {
         switch (opt) {
             case 'n':
                 number_lines = 1;

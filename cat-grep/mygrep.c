@@ -1,45 +1,63 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <regex.h>
 
-#define MAX_LINE_LENGTH 1024
+#define RED_COLOR "\033[1;31m"
+#define RESET_COLOR "\033[0m"
 
-int contains_pattern(const char *line, const char *pattern) {
-    return strstr(line, pattern) != NULL;
-}
+void print_line_with_highlight(const char *line, regex_t *regex) {
+    const char *p = line;
+    regmatch_t match;
+    int no_matches = 1;
 
-void grep_stream(FILE *stream, const char *pattern) {
-    char line[MAX_LINE_LENGTH];
-
-    while (fgets(line, sizeof(line), stream)) {
-        if (contains_pattern(line, pattern)) {
-            printf("%s", line);
-        }
+    while (regexec(regex, p, 1, &match, 0) == 0) {
+	no_matches = 0;
+        fwrite(p, 1, match.rm_so, stdout);
+        fwrite(RED_COLOR, 1, strlen(RED_COLOR), stdout);
+        fwrite(p + match.rm_so, 1, match.rm_eo - match.rm_so, stdout);
+        fwrite(RESET_COLOR, 1, strlen(RESET_COLOR), stdout);
+        p += match.rm_eo;
+    }
+    if (!no_matches)
+    {
+	fputs(p, stdout);
     }
 }
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <pattern> [file ...]\n", argv[0]);
-        return EXIT_FAILURE;
+        fprintf(stderr, "Usage: %s pattern [file...]\n", argv[0]);
+        return 1;
     }
 
-    const char *pattern = argv[1];
+    regex_t regex;
+    if (regcomp(&regex, argv[1], REG_EXTENDED) != 0) {
+        return 1;
+    }
 
     if (argc == 2) {
-        grep_stream(stdin, pattern);
+        char buffer[1024];
+        while (fgets(buffer, sizeof(buffer), stdin)) {
+            print_line_with_highlight(buffer, &regex);
+        }
     } else {
-        for (int i = 2; i < argc; ++i) {
+        for (int i = 2; i < argc; i++) {
             FILE *file = fopen(argv[i], "r");
             if (file == NULL) {
                 perror(argv[i]);
                 continue;
             }
-
-            grep_stream(file, pattern);
+            char buffer[1024];
+            while (fgets(buffer, sizeof(buffer), file)) {
+                print_line_with_highlight(buffer, &regex);
+            }
             fclose(file);
         }
     }
 
-    return EXIT_SUCCESS;
+    regfree(&regex);
+
+    return 0;
 }
+
