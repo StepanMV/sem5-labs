@@ -1,12 +1,9 @@
 .PHONY: all clean run
-CFLAGS = -Wall -Wextra -std=c99
 TARGET = ls
 SRCS = ls.c
 
-all: $(TARGET)
-
-$(TARGET):
-	gcc $(SRCS) -o $(TARGET) $(CFLAGS)
+all:
+	gcc $(SRCS) -o $(TARGET)
 
 clean:
 	rm -f *.o $(TARGET)

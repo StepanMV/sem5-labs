@@ -115,7 +115,7 @@ void print_file_info(const char *name, struct stat *fileStat, int detailed, stru
         struct tm lt;
         localtime_r(&fileStat->st_mtime, &lt);
         strftime(timebuf, sizeof(timebuf), "%b %d %H:%M", &lt);
-        printf(" %s", timebuf);
+        printf(" %s ", timebuf);
     }
 
     const char *color = RESET;
@@ -132,7 +132,19 @@ void print_file_info(const char *name, struct stat *fileStat, int detailed, stru
         color = GREEN;
     }
 
-    printf(" %s%s%s\n", color, name, RESET);
+    if (detailed)
+    {
+	printf("%s%s%s\n", color, name, RESET);
+    }
+    else
+    {
+	printf("%s%s%s  ", color, name, RESET);
+    }
+}
+
+int compare_names(const struct dirent **a, const struct dirent **b)
+{
+    return strcasecmp((*a)->d_name, (*b)->d_name);
 }
 
 void list_directory(const char *path, int show_hidden, int detailed)
@@ -144,7 +156,7 @@ void list_directory(const char *path, int show_hidden, int detailed)
     struct max_lengths max_len;
     calculate_max_lengths(path, show_hidden, &max_len);
 
-    if ((n = scandir(path, &namelist, NULL, alphasort)) == -1)
+    if ((n = scandir(path, &namelist, NULL, compare_names)) == -1)
     {
         perror("scandir");
         exit(EXIT_FAILURE);
@@ -174,7 +186,10 @@ void list_directory(const char *path, int show_hidden, int detailed)
         print_file_info(entry->d_name, &fileStat, detailed, &max_len);
         free(entry);
     }
-
+    if (!detailed)
+    {
+	printf("\n");
+    }
     free(namelist);
 }
 
