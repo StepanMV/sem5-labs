@@ -12,6 +12,7 @@
 #define BLUE "\x1b[34m"
 #define GREEN "\x1b[32m"
 #define CYAN "\x1b[36m"
+#define RED "\x1b[31m"
 #define RESET "\x1b[0m"
 
 struct max_lengths
@@ -128,15 +129,40 @@ void print_file_info(const char *path, const char *name, struct stat *fileStat, 
     }
 
     const char *color = RESET;
+    int is_bad_link = 0;
+
     if (S_ISDIR(fileStat->st_mode))
     {
         color = BLUE;
     }
     else if (S_ISLNK(fileStat->st_mode))
     {
-        color = CYAN;
+        char link_target[1024];
+        ssize_t len = readlink(path, link_target, sizeof(link_target) - 1);
+        if (len != -1)
+        {
+            link_target[len] = '\0'; // Null-terminate the string
+
+            // Check if the target exists
+            struct stat target_stat;
+            if (stat(path, &target_stat) == -1)
+            {
+                color = RED; // Bad link (target doesn't exist)
+                is_bad_link = 1;
+            }
+            else
+            {
+                color = CYAN; // Valid link
+            }
+        }
     }
     else if (fileStat->st_mode & S_IXUSR)
+    {
+        color = GREEN;
+    }
+
+    // Check for world-writable files (available to everybody)
+    if (fileStat->st_mode & S_IWOTH)
     {
         color = GREEN;
     }
@@ -152,8 +178,8 @@ void print_file_info(const char *path, const char *name, struct stat *fileStat, 
             ssize_t len = readlink(path, link_target, sizeof(link_target) - 1);
             if (len != -1)
             {
-                link_target[len] = '\0'; // Null terminate the string
-                printf(" -> %s", link_target);
+                link_target[len] = '\0'; // Null-terminate the string
+                printf(" -> %s%s%s", is_bad_link ? RED : RESET, link_target, RESET);
             }
         }
 
