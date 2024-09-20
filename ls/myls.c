@@ -63,8 +63,8 @@ void calculate_max_lengths(const char *path, int show_hidden, struct max_lengths
         struct group *grp = getgrgid(fileStat.st_gid);
 
         int links_len = snprintf(NULL, 0, "%ld", (long)fileStat.st_nlink);
-        int owner_len = strlen(pwd->pw_name);
-        int group_len = strlen(grp->gr_name);
+        int owner_len = pwd ? strlen(pwd->pw_name) : 0;
+        int group_len = grp ? strlen(grp->gr_name) : 0;
         int size_len = snprintf(NULL, 0, "%ld", (long)fileStat.st_size);
 
         if (links_len > max_len->links_len)
