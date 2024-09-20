@@ -13,6 +13,10 @@ void print_line_with_highlight(const char *line, regex_t *regex) {
 
     while (regexec(regex, p, 1, &match, 0) == 0) {
 	no_matches = 0;
+	if (match.rm_eo - match.rm_so == 0)
+	{
+		break;
+	}
         fwrite(p, 1, match.rm_so, stdout);
         fwrite(RED_COLOR, 1, strlen(RED_COLOR), stdout);
         fwrite(p + match.rm_so, 1, match.rm_eo - match.rm_so, stdout);
