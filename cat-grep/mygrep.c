@@ -37,8 +37,9 @@ int main(int argc, char *argv[]) {
     }
 
     if (argc == 2) {
-        char buffer[1024];
-        while (fgets(buffer, sizeof(buffer), stdin)) {
+        char *buffer = NULL;
+        size_t len = 0;
+        while (getline(&buffer, &len, stdin)) {
             print_line_with_highlight(buffer, &regex);
         }
     } else {
@@ -48,8 +49,9 @@ int main(int argc, char *argv[]) {
                 perror(argv[i]);
                 continue;
             }
-            char buffer[1024];
-            while (fgets(buffer, sizeof(buffer), file)) {
+            char *buffer = NULL;
+            size_t len = 0;
+            while (getline(&buffer, &len, file)) {
                 print_line_with_highlight(buffer, &regex);
             }
             fclose(file);

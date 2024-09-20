@@ -4,10 +4,11 @@
 #include <string.h>
 
 void print_file(FILE *fp, int show_ends, int number_lines, int number_nonempty_lines) {
-    char line[1024];
+    char *line = NULL;
+    size_t len = 0;
     int line_number = 1;
     
-    while (fgets(line, sizeof(line), fp)) {
+    while (getline(&line, &len, fp)) {
         int is_empty = (line[0] == '\n');
 
         if (number_lines && (!number_nonempty_lines || !is_empty)) {
