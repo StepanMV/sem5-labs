@@ -160,11 +160,6 @@ void print_file_info(const char *path, const char *name, struct stat *fileStat, 
         color = GREEN;
     }
 
-    if (fileStat->st_mode & S_IWOTH && !S_ISLNK(fileStat->st_mode))
-    {
-        color = *color + BG_GREEN;
-    }
-
     if (detailed)
     {
         printf("%s%s%s", color, name, RESET);
