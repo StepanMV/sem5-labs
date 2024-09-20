@@ -106,7 +106,14 @@ void print_file_info(const char *name, struct stat *fileStat, int detailed, stru
 
         struct passwd *pwd = getpwuid(fileStat->st_uid);
         struct group *grp = getgrgid(fileStat->st_gid);
-        printf(" %-*s %-*s", max_len->owner_len, pwd->pw_name, max_len->group_len, grp->gr_name);
+        if (pwd && grp)
+        {
+            printf(" %-*s %-*s", max_len->owner_len, pwd->pw_name, max_len->group_len, grp->gr_name);
+        }
+        else
+        {
+            printf(" %-*s %-*s", max_len->owner_len, "error", max_len->group_len, "error");
+        }
 
         printf(" %*ld", max_len->size_len, (long)fileStat->st_size);
 
