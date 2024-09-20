@@ -54,7 +54,6 @@ void calculate_max_lengths(const char *path, int show_hidden, struct max_lengths
 
         if (lstat(fullpath, &fileStat) == -1)
         {
-            perror("lstat");
             free(entry);
             continue;
         }
@@ -96,8 +95,11 @@ void print_permissions(struct stat *fileStat)
     printf((fileStat->st_mode & S_IXOTH) ? "x" : "-");
 }
 
-void print_file_info(const char *name, struct stat *fileStat, int detailed, struct max_lengths *max_len)
+void print_file_info(int index, const char *name, struct stat *fileStat, int detailed, struct max_lengths *max_len, const char *fullpath)
 {
+    // Print file number
+    printf("%3d. ", index + 1);
+
     if (detailed)
     {
         print_permissions(fileStat);
@@ -138,14 +140,22 @@ void print_file_info(const char *name, struct stat *fileStat, int detailed, stru
         color = GREEN;
     }
 
-    if (detailed)
+    // Print the file name with appropriate color
+    printf("%s%s%s", color, name, RESET);
+
+    // If it's a symbolic link, print where it points to
+    if (S_ISLNK(fileStat->st_mode))
     {
-	    printf("%s%s%s\n", color, name, RESET);
+        char link_target[1024];
+        ssize_t len = readlink(fullpath, link_target, sizeof(link_target) - 1);
+        if (len != -1)
+        {
+            link_target[len] = '\0';  // Null-terminate the target path
+            printf(" -> %s", link_target);
+        }
     }
-    else
-    {
-	    printf("%s%s%s  ", color, name, RESET);
-    }
+
+    printf("\n");
 }
 
 int compare_names(const struct dirent **a, const struct dirent **b)
@@ -186,13 +196,13 @@ void list_directory(const char *path, int show_hidden, int detailed)
             continue;
         }
 
-        print_file_info(entry->d_name, &fileStat, detailed, &max_len);
+        print_file_info(i, entry->d_name, &fileStat, detailed, &max_len, fullpath);
         free(entry);
     }
 
     if (!detailed)
     {
-	    printf("\n");
+        printf("\n");
     }
 
     free(namelist);
