@@ -22,7 +22,7 @@ struct max_lengths
     int size_len;
 };
 
-void calculate_max_lengths(const char *path, int show_hidden, struct max_lengths *max_len)
+void calculate_max_lengths(const char *path, int show_hidden, struct max_lengths *max_len, blkcnt_t *total_blocks)
 {
     struct dirent **namelist;
     int n;
@@ -37,6 +37,7 @@ void calculate_max_lengths(const char *path, int show_hidden, struct max_lengths
     max_len->owner_len = 0;
     max_len->group_len = 0;
     max_len->size_len = 0;
+    *total_blocks = 0;
 
     for (int i = 0; i < n; i++)
     {
@@ -57,6 +58,9 @@ void calculate_max_lengths(const char *path, int show_hidden, struct max_lengths
             free(entry);
             continue;
         }
+
+        // Accumulate the total number of blocks
+        *total_blocks += fileStat.st_blocks;
 
         struct passwd *pwd = getpwuid(fileStat.st_uid);
         struct group *grp = getgrgid(fileStat.st_gid);
@@ -95,11 +99,8 @@ void print_permissions(struct stat *fileStat)
     printf((fileStat->st_mode & S_IXOTH) ? "x" : "-");
 }
 
-void print_file_info(int index, const char *name, struct stat *fileStat, int detailed, struct max_lengths *max_len, const char *fullpath)
+void print_file_info(const char *path, const char *name, struct stat *fileStat, int detailed, struct max_lengths *max_len)
 {
-    // Print file number
-    printf("%3d. ", index + 1);
-
     if (detailed)
     {
         print_permissions(fileStat);
@@ -140,22 +141,28 @@ void print_file_info(int index, const char *name, struct stat *fileStat, int det
         color = GREEN;
     }
 
-    // Print the file name with appropriate color
-    printf("%s%s%s", color, name, RESET);
-
-    // If it's a symbolic link, print where it points to
-    if (S_ISLNK(fileStat->st_mode))
+    if (detailed)
     {
-        char link_target[1024];
-        ssize_t len = readlink(fullpath, link_target, sizeof(link_target) - 1);
-        if (len != -1)
-        {
-            link_target[len] = '\0';  // Null-terminate the target path
-            printf(" -> %s", link_target);
-        }
-    }
+        printf("%s%s%s", color, name, RESET);
 
-    printf("\n");
+        // If the file is a symbolic link, display where it points to
+        if (S_ISLNK(fileStat->st_mode))
+        {
+            char link_target[1024];
+            ssize_t len = readlink(path, link_target, sizeof(link_target) - 1);
+            if (len != -1)
+            {
+                link_target[len] = '\0'; // Null terminate the string
+                printf(" -> %s", link_target);
+            }
+        }
+
+        printf("\n");
+    }
+    else
+    {
+        printf("%s%s%s  ", color, name, RESET);
+    }
 }
 
 int compare_names(const struct dirent **a, const struct dirent **b)
@@ -169,7 +176,11 @@ void list_directory(const char *path, int show_hidden, int detailed)
     int n;
 
     struct max_lengths max_len;
-    calculate_max_lengths(path, show_hidden, &max_len);
+    blkcnt_t total_blocks;
+    calculate_max_lengths(path, show_hidden, &max_len, &total_blocks);
+
+    // Print total number of blocks
+    printf("total %ld\n", (long)total_blocks / 2); // Divide by 2 to match the behavior of 'ls'
 
     if ((n = scandir(path, &namelist, NULL, compare_names)) == -1)
     {
@@ -196,7 +207,7 @@ void list_directory(const char *path, int show_hidden, int detailed)
             continue;
         }
 
-        print_file_info(i, entry->d_name, &fileStat, detailed, &max_len, fullpath);
+        print_file_info(fullpath, entry->d_name, &fileStat, detailed, &max_len);
         free(entry);
     }
 
