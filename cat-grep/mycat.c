@@ -8,7 +8,7 @@ void print_file(FILE *fp, int show_ends, int number_lines, int number_nonempty_l
     size_t len = 0;
     int line_number = 1;
     
-    while (getline(&line, &len, fp)) {
+    while (getline(&line, &len, fp) != -1) {
         int is_empty = (line[0] == '\n');
 
         if (number_lines && (!number_nonempty_lines || !is_empty)) {
@@ -52,8 +52,8 @@ int main(int argc, char *argv[]) {
                 show_ends = 1;
                 break;
             default:
-                fprintf(stderr, "Usage: %s [-n] [-b] [-E] [file...]\n", argv[0]);
-                exit(EXIT_FAILURE);
+                fprintf(stderr, "Usage: %s [-n] [-b] [-E] <file> ...\n", argv[0]);
+                return 1;
         }
     }
 

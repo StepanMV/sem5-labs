@@ -1,5 +1,7 @@
+# Useless directories
 .vscode
 
+# No extension
 *
 !/**/
 !*.*

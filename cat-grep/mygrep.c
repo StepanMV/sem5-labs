@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     if (argc == 2) {
         char *buffer = NULL;
         size_t len = 0;
-        while (getline(&buffer, &len, stdin)) {
+        while (getline(&buffer, &len, stdin) != -1) {
             print_line_with_highlight(buffer, &regex);
         }
     } else {
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
             }
             char *buffer = NULL;
             size_t len = 0;
-            while (getline(&buffer, &len, file)) {
+            while (getline(&buffer, &len, file) != -1) {
                 print_line_with_highlight(buffer, &regex);
             }
             fclose(file);
