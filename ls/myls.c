@@ -24,7 +24,6 @@ struct max_lengths
 
 void calculate_max_lengths(const char *path, int show_hidden, struct max_lengths *max_len)
 {
-    DIR *dir;
     struct dirent **namelist;
     int n;
 
@@ -134,11 +133,11 @@ void print_file_info(const char *name, struct stat *fileStat, int detailed, stru
 
     if (detailed)
     {
-	printf("%s%s%s\n", color, name, RESET);
+	    printf("%s%s%s\n", color, name, RESET);
     }
     else
     {
-	printf("%s%s%s  ", color, name, RESET);
+	    printf("%s%s%s  ", color, name, RESET);
     }
 }
 
@@ -149,7 +148,6 @@ int compare_names(const struct dirent **a, const struct dirent **b)
 
 void list_directory(const char *path, int show_hidden, int detailed)
 {
-    DIR *dir;
     struct dirent **namelist;
     int n;
 
@@ -158,8 +156,7 @@ void list_directory(const char *path, int show_hidden, int detailed)
 
     if ((n = scandir(path, &namelist, NULL, compare_names)) == -1)
     {
-        perror("scandir");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
 
     for (int i = 0; i < n; i++)
@@ -178,7 +175,6 @@ void list_directory(const char *path, int show_hidden, int detailed)
 
         if (lstat(fullpath, &fileStat) == -1)
         {
-            perror("lstat");
             free(entry);
             continue;
         }
@@ -186,10 +182,12 @@ void list_directory(const char *path, int show_hidden, int detailed)
         print_file_info(entry->d_name, &fileStat, detailed, &max_len);
         free(entry);
     }
+
     if (!detailed)
     {
-	printf("\n");
+	    printf("\n");
     }
+
     free(namelist);
 }
 
@@ -210,8 +208,8 @@ int main(int argc, char **argv)
             show_hidden = 1;
             break;
         default:
-            fprintf(stderr, "Usage: %s [-l] [-a] [directory...]\n", argv[0]);
-            exit(EXIT_FAILURE);
+            fprintf(stderr, "Usage: %s [-l] [-a] <directory> ...\n", argv[0]);
+            return 1;
         }
     }
 
