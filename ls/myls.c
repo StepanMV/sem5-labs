@@ -60,7 +60,6 @@ void calculate_max_lengths(const char *path, int show_hidden, struct max_lengths
             continue;
         }
 
-        // Accumulate the total number of blocks
         *total_blocks += fileStat.st_blocks;
 
         struct passwd *pwd = getpwuid(fileStat.st_uid);
@@ -141,18 +140,17 @@ void print_file_info(const char *path, const char *name, struct stat *fileStat, 
         ssize_t len = readlink(path, link_target, sizeof(link_target) - 1);
         if (len != -1)
         {
-            link_target[len] = '\0'; // Null-terminate the string
+            link_target[len] = '\0';
 
-            // Check if the target exists
             struct stat target_stat;
             if (stat(path, &target_stat) == -1)
             {
-                color = RED; // Bad link (target doesn't exist)
+                color = RED;
                 is_bad_link = 1;
             }
             else
             {
-                color = CYAN; // Valid link
+                color = CYAN;
             }
         }
     }
@@ -161,24 +159,17 @@ void print_file_info(const char *path, const char *name, struct stat *fileStat, 
         color = GREEN;
     }
 
-    // Check for world-writable files (available to everybody)
-    if (fileStat->st_mode & S_IWOTH)
-    {
-        color = GREEN;
-    }
-
     if (detailed)
     {
         printf("%s%s%s", color, name, RESET);
 
-        // If the file is a symbolic link, display where it points to
         if (S_ISLNK(fileStat->st_mode))
         {
             char link_target[1024];
             ssize_t len = readlink(path, link_target, sizeof(link_target) - 1);
             if (len != -1)
             {
-                link_target[len] = '\0'; // Null-terminate the string
+                link_target[len] = '\0';
                 printf(" -> %s%s%s", is_bad_link ? RED : RESET, link_target, RESET);
             }
         }
@@ -205,8 +196,7 @@ void list_directory(const char *path, int show_hidden, int detailed)
     blkcnt_t total_blocks;
     calculate_max_lengths(path, show_hidden, &max_len, &total_blocks);
 
-    // Print total number of blocks
-    printf("total %ld\n", (long)total_blocks / 2); // Divide by 2 to match the behavior of 'ls'
+    printf("total %ld\n", (long)total_blocks / 2);
 
     if ((n = scandir(path, &namelist, NULL, compare_names)) == -1)
     {
