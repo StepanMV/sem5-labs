@@ -19,7 +19,7 @@ void sigterm_handler(int signum, siginfo_t *info, void *context)
 
 void on_exit_handler(void)
 {
-    printf("Program is exiting. Custom exit handler executed.\n");
+    printf("Process (PID: %d) is exiting. Custom exit handler executed.\n", getpid());
 }
 
 int main()
@@ -64,7 +64,6 @@ int main()
     {
         printf("This is the parent process (PID: %d). Created child with PID: %d\n", getpid(), pid);
         wait(NULL);
-        printf("Child process has terminated.\n");
     }
 
     return 0;
