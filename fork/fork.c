@@ -14,7 +14,7 @@ void sigint_handler(int signum)
 
 void sigterm_handler(int signum, siginfo_t *info, void *context)
 {
-    printf("Process (PID: %d) received SIGTERM (signal %d) from process %d.\n", getpid(), signum, info->si_pid);
+    printf("Process (PID: %d) received (and is going to ignore) SIGTERM (signal %d) from process %d.\n", getpid(), signum, info->si_pid);
 }
 
 void on_exit_handler(void)
@@ -58,7 +58,6 @@ int main()
     {
         printf("This is the child process (PID: %d). Waiting %d seconds\n", getpid(), CHILD_WAIT);
         sleep(CHILD_WAIT);
-        exit(0);
     }
     else
     {
@@ -66,5 +65,6 @@ int main()
         wait(NULL);
     }
 
+    printf("I'm just the last line of code\n");
     return 0;
 }
