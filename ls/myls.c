@@ -9,7 +9,6 @@
 #include <time.h>
 #include <errno.h>
 
-#define BG_GREEN "\x1b[42m"
 #define BLUE "\x1b[34m"
 #define GREEN "\x1b[32m"
 #define CYAN "\x1b[36m"
