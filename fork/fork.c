@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#define CHILD_WAIT 10
+
 void sigint_handler(int signum)
 {
     printf("Received SIGINT (signal %d). Custom handler executed in process (PID: %d).\n", signum, getpid());
@@ -12,7 +14,7 @@ void sigint_handler(int signum)
 
 void sigterm_handler(int signum, siginfo_t *info, void *context)
 {
-    printf("Received SIGTERM (signal %d) from process %d.\n", signum, info->si_pid);
+    printf("Process (PID: %d) received SIGTERM (signal %d) from process %d.\n", getpid(), signum, info->si_pid);
 }
 
 void on_exit_handler(void)
@@ -54,8 +56,8 @@ int main()
     }
     else if (pid == 0)
     {
-        printf("This is the child process (PID: %d)\n", getpid());
-        sleep(10);
+        printf("This is the child process (PID: %d). Waiting %d seconds\n", getpid(), CHILD_WAIT);
+        sleep(CHILD_WAIT);
         exit(0);
     }
     else
