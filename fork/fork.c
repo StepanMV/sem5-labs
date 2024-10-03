@@ -58,13 +58,14 @@ int main()
     {
         printf("This is the child process (PID: %d). Waiting %d seconds\n", getpid(), CHILD_WAIT);
         sleep(CHILD_WAIT);
+        printf("Sleed finished! Feeling fine. Might have recieved some signals, idk.\n");
     }
     else
     {
         printf("This is the parent process (PID: %d). Created child with PID: %d\n", getpid(), pid);
         wait(NULL);
+        printf("Wait finished! Feeling fine. Might have recieved some signals, idk.\n");
     }
 
-    printf("I'm just the last line of code\n");
     return 0;
 }
