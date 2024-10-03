@@ -7,7 +7,7 @@
 
 void sigint_handler(int signum)
 {
-    printf("Received SIGINT (signal %d). Custom handler executed.\n", signum);
+    printf("Received SIGINT (signal %d). Custom handler executed in process (PID: %d).\n", signum, getpid());
 }
 
 void sigterm_handler(int signum, siginfo_t *info, void *context)
