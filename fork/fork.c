@@ -17,7 +17,7 @@ void sigterm_handler(int signum, siginfo_t *info, void *context)
     printf("Process (PID: %d) received (and is going to ignore) SIGTERM (signal %d) from process %d.\n", getpid(), signum, info->si_pid);
 }
 
-void on_exit_handler(void)
+void on_exit_handler()
 {
     printf("Process (PID: %d) is exiting. Custom exit handler executed.\n", getpid());
 }
@@ -25,7 +25,6 @@ void on_exit_handler(void)
 int main()
 {
     pid_t pid;
-    int status;
 
     if (atexit(on_exit_handler) != 0)
     {
@@ -63,6 +62,7 @@ int main()
     }
     else
     {
+        int status;
         printf("This is the parent process (PID: %d). Created child with PID: %d\n", getpid(), pid);
         pid_t terminated_pid = wait(&status);
         printf("Wait finished! Feeling fine. Might have recieved some signals, idk.\n");
