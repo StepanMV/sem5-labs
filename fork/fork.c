@@ -25,6 +25,7 @@ void on_exit_handler(void)
 int main()
 {
     pid_t pid;
+    int status;
 
     if (atexit(on_exit_handler) != 0)
     {
@@ -58,13 +59,14 @@ int main()
     {
         printf("This is the child process (PID: %d). Waiting %d seconds\n", getpid(), CHILD_WAIT);
         sleep(CHILD_WAIT);
-        printf("Sleed finished! Feeling fine. Might have recieved some signals, idk.\n");
+        printf("Sleep finished! Feeling fine. Might have received some signals, idk.\n");
     }
     else
     {
         printf("This is the parent process (PID: %d). Created child with PID: %d\n", getpid(), pid);
-        wait(NULL);
+        pid_t terminated_pid = wait(&status);
         printf("Wait finished! Feeling fine. Might have recieved some signals, idk.\n");
+        printf("Child process (PID: %d) exited with status %d\n", terminated_pid, status);
     }
 
     return 0;
