@@ -5,13 +5,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <ctype.h>
 
 int apply_symbolic_mode(const char *mode_str, mode_t *file_mode)
 {
     mode_t add = 0, remove = 0;
     char who = mode_str[0];
     char op = mode_str[1];
-    char *permissions = &mode_str[2];
+    const char *permissions = &mode_str[2];
 
     mode_t user_bit = 0, group_bit = 0, other_bit = 0;
 
@@ -22,7 +23,7 @@ int apply_symbolic_mode(const char *mode_str, mode_t *file_mode)
     if (who == 'o' || who == 'a')
         other_bit = S_IRWXO;
 
-    for (char *p = permissions; *p; p++)
+    for (const char *p = permissions; *p; p++)
     {
         switch (*p)
         {
