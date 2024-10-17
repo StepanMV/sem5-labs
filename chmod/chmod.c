@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <ctype.h>
 
 
 int apply_symbolic_mode(const char *mode_str, mode_t *file_mode) {
@@ -19,7 +20,7 @@ int apply_symbolic_mode(const char *mode_str, mode_t *file_mode) {
     }
 
     char op = mode_str[offset];
-    char *permissions = &mode_str[offset + 1];
+    const char *permissions = &mode_str[offset + 1];
 
     mode_t user_bit = 0, group_bit = 0, other_bit = 0;
 
@@ -27,7 +28,7 @@ int apply_symbolic_mode(const char *mode_str, mode_t *file_mode) {
     if (who == 'g' || who == 'a') group_bit = S_IRWXG;
     if (who == 'o' || who == 'a') other_bit = S_IRWXO;
 
-    for (char *p = permissions; *p; p++) {
+    for (const char *p = permissions; *p; p++) {
         switch (*p) {
             case 'r':
                 add |= (S_IRUSR * !!(user_bit) | S_IRGRP * !!(group_bit) | S_IROTH * !!(other_bit));
