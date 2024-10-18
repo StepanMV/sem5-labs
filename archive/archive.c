@@ -120,7 +120,8 @@ void extract_from_archive(const char *archive_name)
         file_size_remaining = metadata.size;
         while (file_size_remaining > 0)
         {
-            bytes_read = read(archive_fd, buffer, BUF_SIZE);
+
+            bytes_read = read(archive_fd, buffer, (file_size_remaining > BUF_SIZE) ? BUF_SIZE : file_size_remaining);
             if (bytes_read == -1)
             {
                 perror("Error reading from archive");
@@ -128,6 +129,7 @@ void extract_from_archive(const char *archive_name)
                 close(archive_fd);
                 exit(EXIT_FAILURE);
             }
+
             bytes_written = write(file_fd, buffer, bytes_read);
             if (bytes_written != bytes_read)
             {
@@ -136,6 +138,7 @@ void extract_from_archive(const char *archive_name)
                 close(archive_fd);
                 exit(EXIT_FAILURE);
             }
+
             file_size_remaining -= bytes_written;
         }
 
