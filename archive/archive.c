@@ -129,7 +129,6 @@ void delete_from_archive(const char *archive_name, char **files, int file_count)
         {
             if (strcmp(metadata.filename, files[i]) == 0)
             {
-                printf("Deleting file: %s\n", metadata.filename);
                 skip_file = 1;
                 file_found = 1;
 
@@ -192,7 +191,6 @@ void delete_from_archive(const char *archive_name, char **files, int file_count)
 
         remove(archive_name);
         rename("temp.arch", archive_name);
-        printf("File(s) deleted successfully from the archive.\n");
     }
 }
 
@@ -311,7 +309,7 @@ int main(int argc, char *argv[])
     char **files = NULL;
     int file_count = 0;
 
-    while ((opt = getopt(argc, argv, "i:d:es:h")) != -1)
+    while ((opt = getopt(argc, argv, "i:d:esh")) != -1)
     {
         switch (opt)
         {
