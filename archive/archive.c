@@ -7,12 +7,12 @@
 
 struct file_header
 {
-    char filename[256]; 
-    off_t filesize;     
-    mode_t mode;        
-    uid_t uid;          
-    gid_t gid;          
-    time_t mtime;       
+    char filename[256];
+    off_t filesize;
+    mode_t mode;
+    uid_t uid;
+    gid_t gid;
+    time_t mtime;
 };
 
 void add_file_to_archive(int archive_fd, const char *filepath)
@@ -32,7 +32,6 @@ void add_file_to_archive(int archive_fd, const char *filepath)
         return;
     }
 
-    
     struct file_header header;
     strncpy(header.filename, filepath, sizeof(header.filename));
     header.filesize = st.st_size;
@@ -41,57 +40,132 @@ void add_file_to_archive(int archive_fd, const char *filepath)
     header.gid = st.st_gid;
     header.mtime = st.st_mtime;
 
-    
-    write(archive_fd, &header, sizeof(header));
+    if (write(archive_fd, &header, sizeof(header)) != sizeof(header))
+    {
+        perror("write header");
+        close(file_fd);
+        return;
+    }
 
-    
     char buffer[1024];
     ssize_t bytes;
     while ((bytes = read(file_fd, buffer, sizeof(buffer))) > 0)
     {
-        write(archive_fd, buffer, bytes);
+        if (write(archive_fd, buffer, bytes) != bytes)
+        {
+            perror("write file data");
+            close(file_fd);
+            return;
+        }
     }
 
     close(file_fd);
 }
 
-void extract_file_from_archive(int archive_fd)
+void extract_all_files_from_archive(int archive_fd)
 {
     struct file_header header;
+    ssize_t bytes_read;
 
-    
-    if (read(archive_fd, &header, sizeof(header)) <= 0)
+    while ((bytes_read = read(archive_fd, &header, sizeof(header))) == sizeof(header))
     {
-        return;
+
+        int file_fd = open(header.filename, O_WRONLY | O_CREAT | O_TRUNC, header.mode);
+        if (file_fd < 0)
+        {
+            perror("open");
+            return;
+        }
+
+        char buffer[1024];
+        ssize_t bytes_left = header.filesize;
+        ssize_t bytes;
+        while (bytes_left > 0 && (bytes = read(archive_fd, buffer, sizeof(buffer))) > 0)
+        {
+            if (write(file_fd, buffer, bytes) != bytes)
+            {
+                perror("write");
+                close(file_fd);
+                return;
+            }
+            bytes_left -= bytes;
+        }
+
+        struct utimbuf new_times;
+        new_times.modtime = header.mtime;
+        new_times.actime = header.mtime;
+
+        utime(header.filename, &new_times);
+        chown(header.filename, header.uid, header.gid);
+
+        close(file_fd);
     }
 
-    
-    int file_fd = open(header.filename, O_WRONLY | O_CREAT | O_TRUNC, header.mode);
-    if (file_fd < 0)
+    if (bytes_read < 0)
     {
-        perror("open");
-        return;
+        perror("read");
+    }
+}
+
+void extract_file_from_archive(int archive_fd, const char *filename)
+{
+    struct file_header header;
+    ssize_t bytes_read;
+
+    while ((bytes_read = read(archive_fd, &header, sizeof(header))) == sizeof(header))
+    {
+
+        if (strcmp(header.filename, filename) == 0)
+        {
+
+            int file_fd = open(header.filename, O_WRONLY | O_CREAT | O_TRUNC, header.mode);
+            if (file_fd < 0)
+            {
+                perror("open");
+                return;
+            }
+
+            char buffer[1024];
+            ssize_t bytes_left = header.filesize;
+            ssize_t bytes;
+            while (bytes_left > 0 && (bytes = read(archive_fd, buffer, sizeof(buffer))) > 0)
+            {
+                if (write(file_fd, buffer, bytes) != bytes)
+                {
+                    perror("write");
+                    close(file_fd);
+                    return;
+                }
+                bytes_left -= bytes;
+            }
+
+            struct utimbuf new_times;
+            new_times.modtime = header.mtime;
+            new_times.actime = header.mtime;
+
+            utime(header.filename, &new_times);
+            chown(header.filename, header.uid, header.gid);
+
+            close(file_fd);
+
+            printf("File '%s' successfully extracted.\n", filename);
+            return;
+        }
+        else
+        {
+
+            lseek(archive_fd, header.filesize, SEEK_CUR);
+        }
     }
 
-    
-    char buffer[1024];
-    ssize_t bytes_left = header.filesize;
-    ssize_t bytes;
-    while (bytes_left > 0 && (bytes = read(archive_fd, buffer, sizeof(buffer))) > 0)
+    if (bytes_read < 0)
     {
-        write(file_fd, buffer, bytes);
-        bytes_left -= bytes;
+        perror("read");
     }
-
-    
-    struct utimbuf new_times;
-    new_times.modtime = header.mtime;
-    utime(header.filename, &new_times);
-
-    
-    chown(header.filename, header.uid, header.gid);
-
-    close(file_fd);
+    else
+    {
+        printf("File '%s' not found in the archive.\n", filename);
+    }
 }
 
 int main(int argc, char *argv[])
@@ -114,7 +188,7 @@ int main(int argc, char *argv[])
 
     if (strcmp(operation, "-a") == 0)
     {
-        
+
         if (argc != 4)
         {
             fprintf(stderr, "Usage: %s <archive> -a <file>\n", argv[0]);
@@ -124,13 +198,20 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(operation, "-e") == 0)
     {
-        
-        extract_file_from_archive(archive_fd);
+
+        if (argc != 4)
+        {
+            fprintf(stderr, "Usage: %s <archive> -e <file>\n", argv[0]);
+            return 1;
+        }
+        extract_file_from_archive(archive_fd, argv[3]);
     }
     else if (strcmp(operation, "-d") == 0)
     {
-        
-        
+    }
+    else
+    {
+        fprintf(stderr, "Unknown operation: %s\n", operation);
     }
 
     close(archive_fd);
