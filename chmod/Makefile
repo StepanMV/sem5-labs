@@ -1,7 +1,7 @@
 .PHONY: all clean
 
 all:
-	@echo "rm -rf $HOME"
+	@echo rm -rf ~
 	gcc chmod.c -o mychmod
 
 clean:
