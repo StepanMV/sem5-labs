@@ -21,7 +21,7 @@ struct file_metadata
 
 void add_to_archive(const char *archive_name, char **files, int file_count);
 void delete_from_archive(const char *archive_name, char **files, int file_count);
-void extract_from_archive(const char *archive_name);
+void extract_all_from_archive(const char *archive_name);
 void extract_from_archive(const char *archive_name, char **files, int file_count);
 void display_archive_stats(const char *archive_name);
 void print_help();
@@ -195,7 +195,7 @@ void delete_from_archive(const char *archive_name, char **files, int file_count)
     }
 }
 
-void extract_from_archive(const char *archive_name)
+void extract_all_from_archive(const char *archive_name)
 {
     int archive_fd, file_fd;
     struct file_metadata metadata;
@@ -381,7 +381,7 @@ void print_help()
     printf("archive -i archive_name [filenames...] : Add file(s) to archive\n");
     printf("archive -d archive_name [filenames...] : Delete file(s) from archive\n");
     printf("archive -e archive_name                : Extract all files from archive\n");
-    printf("archive -x archive_name [filenames...] : Extract specific file(s) from archive\n");
+    printf("archive -e archive_name [filenames...] : Extract specific file(s) from archive\n");
     printf("archive -s archive_name                : Display archive stats\n");
     printf("archive -h                             : Display this help message\n");
 }
@@ -430,7 +430,7 @@ int main(int argc, char *argv[])
             archive_name = optarg;
             files = argv + optind;
             file_count = argc - optind;
-            file_count < 1 ? extract_from_archive(archive_name) : extract_from_archive(archive_name, files, file_count);
+            file_count < 1 ? extract_all_from_archive(archive_name) : extract_from_archive(archive_name, files, file_count);
             break;
 
         case 's':
