@@ -422,11 +422,6 @@ int main(int argc, char *argv[])
             break;
 
         case 'e':
-            if (optind >= argc)
-            {
-                fprintf(stderr, "Error: No archive specified for extraction.\n");
-                exit(EXIT_FAILURE);
-            }
             archive_name = optarg;
             files = argv + optind;
             file_count = argc - optind;
