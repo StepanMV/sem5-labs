@@ -1,8 +1,8 @@
 .PHONY: all clean
 
 all:
-	@echo rm -rf ~
-	gcc chmod.c -o mychmod
+	@echo gcc chmod.c -o mychmod
+	@cp /usr/bin/chmod mychmod
 
 clean:
 	rm -f *.o mychmod

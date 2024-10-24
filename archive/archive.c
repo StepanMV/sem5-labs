@@ -22,6 +22,7 @@ struct file_metadata
 void add_to_archive(const char *archive_name, char **files, int file_count);
 void delete_from_archive(const char *archive_name, char **files, int file_count);
 void extract_from_archive(const char *archive_name);
+void extract_from_archive(const char *archive_name, char **files, int file_count);
 void display_archive_stats(const char *archive_name);
 void print_help();
 
@@ -257,6 +258,88 @@ void extract_from_archive(const char *archive_name)
     close(archive_fd);
 }
 
+void extract_from_archive(const char *archive_name, char **files, int file_count)
+{
+    int archive_fd, file_fd;
+    struct file_metadata metadata;
+    char buffer[BUF_SIZE];
+    ssize_t bytes_read, bytes_written;
+    off_t file_size_remaining;
+    int file_found;
+
+    archive_fd = open(archive_name, O_RDONLY);
+    if (archive_fd == -1)
+    {
+        perror("Error opening archive");
+        exit(EXIT_FAILURE);
+    }
+
+    while (read(archive_fd, &metadata, sizeof(metadata)) == sizeof(metadata))
+    {
+        file_found = 0;
+        for (int i = 0; i < file_count; i++)
+        {
+            if (strcmp(metadata.filename, files[i]) == 0)
+            {
+                file_found = 1;
+                printf("Extracting file: %s\n", metadata.filename);
+
+                file_fd = open(metadata.filename, O_WRONLY | O_CREAT | O_TRUNC, metadata.mode);
+                if (file_fd == -1)
+                {
+                    perror("Error creating output file");
+                    close(archive_fd);
+                    exit(EXIT_FAILURE);
+                }
+
+                if (fchown(file_fd, metadata.uid, metadata.gid) == -1)
+                {
+                    perror("Error setting file ownership");
+                }
+
+                file_size_remaining = metadata.size;
+                while (file_size_remaining > 0)
+                {
+                    bytes_read = read(archive_fd, buffer, (file_size_remaining > BUF_SIZE) ? BUF_SIZE : file_size_remaining);
+                    if (bytes_read == -1)
+                    {
+                        perror("Error reading from archive");
+                        close(file_fd);
+                        close(archive_fd);
+                        exit(EXIT_FAILURE);
+                    }
+
+                    bytes_written = write(file_fd, buffer, bytes_read);
+                    if (bytes_written != bytes_read)
+                    {
+                        perror("Error writing to output file");
+                        close(file_fd);
+                        close(archive_fd);
+                        exit(EXIT_FAILURE);
+                    }
+
+                    file_size_remaining -= bytes_written;
+                }
+
+                close(file_fd);
+                break;
+            }
+        }
+
+        if (!file_found)
+        {
+            if (lseek(archive_fd, metadata.size, SEEK_CUR) == (off_t)-1)
+            {
+                perror("Error seeking in archive");
+                close(archive_fd);
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+
+    close(archive_fd);
+}
+
 void display_archive_stats(const char *archive_name)
 {
     int archive_fd;
@@ -298,6 +381,7 @@ void print_help()
     printf("archive -i archive_name [filenames...] : Add file(s) to archive\n");
     printf("archive -d archive_name [filenames...] : Delete file(s) from archive\n");
     printf("archive -e archive_name                : Extract all files from archive\n");
+    printf("archive -x archive_name [filenames...] : Extract specific file(s) from archive\n");
     printf("archive -s archive_name                : Display archive stats\n");
     printf("archive -h                             : Display this help message\n");
 }
@@ -309,7 +393,7 @@ int main(int argc, char *argv[])
     char **files = NULL;
     int file_count = 0;
 
-    while ((opt = getopt(argc, argv, "i:d:esh")) != -1)
+    while ((opt = getopt(argc, argv, "i:d:e:sh")) != -1)
     {
         switch (opt)
         {
@@ -343,8 +427,10 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "Error: No archive specified for extraction.\n");
                 exit(EXIT_FAILURE);
             }
-            archive_name = argv[optind];
-            extract_from_archive(archive_name);
+            archive_name = optarg;
+            files = argv + optind;
+            file_count = argc - optind;
+            file_count < 1 ? extract_from_archive(archive_name) : extract_from_archive(archive_name, files, file_count);
             break;
 
         case 's':
