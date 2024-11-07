@@ -388,19 +388,24 @@ void print_help()
 
 int main(int argc, char *argv[])
 {
+    if (argc < 3)
+    {
+        fprintf(stderr, "Usage: %s <archive_name> [-i file1 file2 ... | -d file1 file2 ... | -e [file1 file2 ...] | -s | -h]\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    char *archive_name = argv[1];
     int opt;
-    char *archive_name = NULL;
     char **files = NULL;
     int file_count = 0;
 
-    while ((opt = getopt(argc, argv, "i:d:e:sh")) != -1)
+    while ((opt = getopt(argc - 1, argv + 1, "i:d:e:sh")) != -1)
     {
         switch (opt)
         {
         case 'i':
-            archive_name = optarg;
-            files = argv + optind;
-            file_count = argc - optind;
+            files = argv + optind + 1;
+            file_count = argc - optind - 1;
             if (file_count < 1)
             {
                 fprintf(stderr, "Error: No file(s) specified to add to archive.\n");
@@ -410,9 +415,8 @@ int main(int argc, char *argv[])
             break;
 
         case 'd':
-            archive_name = optarg;
-            files = argv + optind;
-            file_count = argc - optind;
+            files = argv + optind + 1;
+            file_count = argc - optind - 1;
             if (file_count < 1)
             {
                 fprintf(stderr, "Error: No file(s) specified to delete from archive.\n");
@@ -422,19 +426,12 @@ int main(int argc, char *argv[])
             break;
 
         case 'e':
-            archive_name = optarg;
-            files = argv + optind;
-            file_count = argc - optind;
+            files = argv + optind + 1;
+            file_count = argc - optind - 1;
             file_count < 1 ? extract_all_from_archive(archive_name) : extract_from_archive(archive_name, files, file_count);
             break;
 
         case 's':
-            if (optind >= argc)
-            {
-                fprintf(stderr, "Error: No archive specified for stats.\n");
-                exit(EXIT_FAILURE);
-            }
-            archive_name = argv[optind];
             display_archive_stats(archive_name);
             break;
 
