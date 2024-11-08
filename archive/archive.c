@@ -386,6 +386,10 @@ void print_help()
     printf("archive -h                             : Display this help message\n");
 }
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 int main(int argc, char *argv[])
 {
     if (argc < 3)
@@ -395,54 +399,61 @@ int main(int argc, char *argv[])
     }
 
     char *archive_name = argv[1];
-    int opt;
     char **files = NULL;
     int file_count = 0;
 
-    while ((opt = getopt(argc - 1, argv + 1, "i:d:e:sh")) != -1)
+    if (strcmp(argv[2], "-i") == 0)
     {
-        switch (opt)
+
+        if (argc < 4)
         {
-        case 'i':
-            files = argv + optind + 1;
-            file_count = argc - optind - 1;
-            if (file_count < 1)
-            {
-                fprintf(stderr, "Error: No file(s) specified to add to archive.\n");
-                exit(EXIT_FAILURE);
-            }
-            add_to_archive(archive_name, files, file_count);
-            break;
-
-        case 'd':
-            files = argv + optind + 1;
-            file_count = argc - optind - 1;
-            if (file_count < 1)
-            {
-                fprintf(stderr, "Error: No file(s) specified to delete from archive.\n");
-                exit(EXIT_FAILURE);
-            }
-            delete_from_archive(archive_name, files, file_count);
-            break;
-
-        case 'e':
-            files = argv + optind + 1;
-            file_count = argc - optind - 1;
-            file_count < 1 ? extract_all_from_archive(archive_name) : extract_from_archive(archive_name, files, file_count);
-            break;
-
-        case 's':
-            display_archive_stats(archive_name);
-            break;
-
-        case 'h':
-            print_help();
-            exit(EXIT_SUCCESS);
-
-        default:
-            print_help();
+            fprintf(stderr, "Error: No file(s) specified to add to archive.\n");
             exit(EXIT_FAILURE);
         }
+        files = argv + 3;
+        file_count = argc - 3;
+        add_to_archive(archive_name, files, file_count);
+    }
+    else if (strcmp(argv[2], "-d") == 0)
+    {
+
+        if (argc < 4)
+        {
+            fprintf(stderr, "Error: No file(s) specified to delete from archive.\n");
+            exit(EXIT_FAILURE);
+        }
+        files = argv + 3;
+        file_count = argc - 3;
+        delete_from_archive(archive_name, files, file_count);
+    }
+    else if (strcmp(argv[2], "-e") == 0)
+    {
+
+        if (argc == 3)
+        {
+            extract_all_from_archive(archive_name);
+        }
+        else
+        {
+            files = argv + 3;
+            file_count = argc - 3;
+            extract_from_archive(archive_name, files, file_count);
+        }
+    }
+    else if (strcmp(argv[2], "-s") == 0)
+    {
+        display_archive_stats(archive_name);
+    }
+    else if (strcmp(argv[2], "-h") == 0)
+    {
+        print_help();
+        exit(EXIT_SUCCESS);
+    }
+    else
+    {
+        fprintf(stderr, "Invalid option.\n");
+        print_help();
+        exit(EXIT_FAILURE);
     }
 
     return 0;
