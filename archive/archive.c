@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        print_help()
+        print_help();
         exit(EXIT_FAILURE);
     }
 
