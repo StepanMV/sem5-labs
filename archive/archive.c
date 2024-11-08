@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        fprintf(stderr, "Usage: %s <archive_name> [-i file1 file2 ... | -d file1 file2 ... | -e [file1 file2 ...] | -s | -h]\n", argv[0]);
+        print_help()
         exit(EXIT_FAILURE);
     }
 
