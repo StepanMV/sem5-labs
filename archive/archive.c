@@ -251,7 +251,7 @@ void extract_all_from_archive(const char *archive_name)
 
             file_size_remaining -= bytes_written;
         }
-
+        fchmod(file_fd, metadata.mode);
         close(file_fd);
     }
 
@@ -320,7 +320,7 @@ void extract_from_archive(const char *archive_name, char **files, int file_count
 
                     file_size_remaining -= bytes_written;
                 }
-
+                fchmod(file_fd, metadata.mode);
                 close(file_fd);
                 break;
             }
