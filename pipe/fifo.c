@@ -49,6 +49,8 @@ int main()
     }
     else
     {
+        time_t child_time = time(NULL);
+        printf("Child (PID: %d) time: %s", getpid(), ctime(&child_time));
 
         int fd = open("myfifo", O_RDONLY);
         if (fd == -1)
@@ -56,9 +58,6 @@ int main()
             perror("Failed to open FIFO for reading");
             exit(1);
         }
-
-        time_t child_time = time(NULL);
-        printf("Child (PID: %d) time: %s", getpid(), ctime(&child_time));
 
         read(fd, message, sizeof(message));
 
