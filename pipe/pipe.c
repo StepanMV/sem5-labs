@@ -29,7 +29,7 @@ int main()
     {
         parent_time = time(NULL);
         printf("Parent (PID: %d) time: %s", getpid(), ctime(&parent_time));
-        snprintf(message, sizeof(message), "Parent (PID: %d) time: %s", getpid(), ctime(&parent_time));
+        snprintf(message, sizeof(message), "Parent (PID: %d) time: %s\n", getpid(), ctime(&parent_time));
 
         close(pipe_fd[0]);
 
@@ -48,7 +48,7 @@ int main()
         close(pipe_fd[0]);
 
         time_t child_time = time(NULL);
-        printf("Child (PID: %d) time: %s", getpid(), ctime(&child_time));
+        printf("Child (PID: %d) time: %s\n", getpid(), ctime(&child_time));
         printf("RECV: %s\n", message);
     }
 
