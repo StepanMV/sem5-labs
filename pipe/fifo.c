@@ -57,11 +57,11 @@ int main()
             exit(1);
         }
 
+        time_t child_time = time(NULL);
         printf("Child (PID: %d) time: %s", getpid(), ctime(&child_time));
 
         read(fd, message, sizeof(message));
 
-        time_t child_time = time(NULL);
         printf("RECV: %s\n", message);
 
         close(fd);
