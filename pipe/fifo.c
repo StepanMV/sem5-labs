@@ -49,9 +49,6 @@ int main()
     }
     else
     {
-        time_t child_time = time(NULL);
-        printf("Child (PID: %d) time: %s", getpid(), ctime(&child_time));
-
         int fd = open("myfifo", O_RDONLY);
         if (fd == -1)
         {
@@ -61,6 +58,8 @@ int main()
 
         read(fd, message, sizeof(message));
 
+        time_t child_time = time(NULL);
+        printf("Child (PID: %d) time: %s", getpid(), ctime(&child_time));
         printf("RECV: %s\n", message);
 
         close(fd);
