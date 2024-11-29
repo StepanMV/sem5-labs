@@ -31,7 +31,7 @@ void *writer_thread(void *arg)
 
 void *reader_thread(void *arg)
 {
-    long tid = *((long *)arg);
+    int tid = *((int *)arg);
 
     while (1)
     {
@@ -69,7 +69,7 @@ int main()
         return 1;
     }
 
-    for (long i = 0; i < NUM_READERS; i++)
+    for (int i = 0; i < NUM_READERS; i++)
     {
         if (pthread_create(&readers[i], NULL, reader_thread, (void *)&i) != 0)
         {
