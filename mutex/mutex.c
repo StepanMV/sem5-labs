@@ -21,9 +21,9 @@ void *writer_thread(void *arg)
         {
             pthread_mutex_lock(&mutex);
             shared_array[i] = 'A' + (write_counter % 26);
-            write_counter++;
-            sleep(3);
             pthread_mutex_unlock(&mutex);
+            write_counter++;
+            sleep(2);
         }
     }
     return NULL;
