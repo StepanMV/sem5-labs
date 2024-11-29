@@ -16,16 +16,15 @@ void *writer_thread(void *arg)
 {
     while (1)
     {
-        pthread_mutex_lock(&mutex);
 
         for (int i = 0; i < ARRAY_SIZE; i++)
         {
+            pthread_mutex_lock(&mutex);
             shared_array[i] = 'A' + (write_counter % 26);
+            write_counter++;
+            pthread_mutex_unlock(&mutex);
         }
-        write_counter++;
         printf("Writer updated array to: %s\n", shared_array);
-
-        pthread_mutex_unlock(&mutex);
 
         sleep(3);
     }
