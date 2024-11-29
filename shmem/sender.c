@@ -19,13 +19,11 @@ int shmid = -1;
 
 void handle_signal(int sig)
 {
-    printf("Stopping the process writing to the shared memory (signal %d)\n", sig);
-
     if (addr != NULL)
     {
         if (shmdt(addr) < 0)
         {
-            perror("Error detaching shared memory");
+            perror("shmdt");
             exit(1);
         }
     }
@@ -34,14 +32,14 @@ void handle_signal(int sig)
     {
         if (shmctl(shmid, IPC_RMID, NULL) < 0)
         {
-            perror("Error removing shared memory segment");
+            perror("shmctl");
             exit(1);
         }
     }
 
     if (remove(SHMEM_FILE) == -1)
     {
-        perror("Error removing shared memory file");
+        perror("remove");
         exit(1);
     }
 
@@ -55,7 +53,7 @@ int main(int argc, char **argv)
     int fd = open(SHMEM_FILE, O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
     if (fd == -1)
     {
-        perror("Create file error");
+        perror("open");
         return 1;
     }
     close(fd);
@@ -63,21 +61,21 @@ int main(int argc, char **argv)
     key_t key = ftok(SHMEM_FILE, 1);
     if (key < 0)
     {
-        perror("Ftok error");
+        perror("ftok");
         return -1;
     }
 
     shmid = shmget(key, SHMEM_SIZE, 0666 | IPC_CREAT);
     if (shmid < 0)
     {
-        perror("Shmid error");
+        perror("shmget");
         return -1;
     }
 
     addr = shmat(shmid, NULL, 0);
     if (addr == (void *)-1)
     {
-        perror("Shmat error");
+        perror("shmat");
         return -1;
     }
 

@@ -15,13 +15,11 @@ char *shared_memory = NULL;
 
 void handle_signal(int sig)
 {
-    printf("Terminating process (signal %d)\n", sig);
-
     if (shared_memory)
     {
         if (shmdt(shared_memory) < 0)
         {
-            perror("Error detaching shared memory");
+            perror("shmdt");
         }
     }
 
@@ -34,21 +32,21 @@ int main()
     key_t key = ftok(SHMEM_FILE, 1);
     if (key < 0)
     {
-        perror("Error generating key");
+        perror("ftok");
         return -1;
     }
 
     int shmid = shmget(key, SHMEM_SIZE, 0666);
     if (shmid < 0)
     {
-        perror("Error accessing shared memory");
+        perror("shmget");
         return -1;
     }
 
     shared_memory = shmat(shmid, NULL, SHM_RDONLY);
     if (shared_memory == (void *)-1)
     {
-        perror("Error attaching shared memory");
+        perror("shmat");
         return -1;
     }
 
@@ -56,11 +54,6 @@ int main()
     signal(SIGINT, handle_signal);
 
     char local_copy[SHMEM_SIZE] = {0};
-    if (!local_copy)
-    {
-        perror("Error allocating memory");
-        handle_signal(0);
-    }
 
     while (1)
     {
