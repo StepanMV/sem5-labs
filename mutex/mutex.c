@@ -22,11 +22,9 @@ void *writer_thread(void *arg)
             pthread_mutex_lock(&mutex);
             shared_array[i] = 'A' + (write_counter % 26);
             write_counter++;
+            sleep(3);
             pthread_mutex_unlock(&mutex);
         }
-        printf("Writer updated array to: %s\n", shared_array);
-
-        sleep(3);
     }
     return NULL;
 }
