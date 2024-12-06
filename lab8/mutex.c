@@ -43,7 +43,7 @@ void *reader_thread(void *arg)
 
         sleep(1);
     }
-    return NULL;
+    return NULL;fvv                                      ggggggggggggggggggggggggvvgb gb g g tgvgtvgtvgtvgt   gt bg vgv gv y g 
 }
 
 int main()
