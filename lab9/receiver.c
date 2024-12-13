@@ -2,6 +2,7 @@
 #include <time.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/sem.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +42,12 @@ int main()
     if (shmid < 0)
     {
         perror("shmget");
+        return -1;
+    }
+
+    int semid = semget(key, 1, 0666);
+    if (semid == -1) {
+        perror("semget() failed");
         return -1;
     }
 
