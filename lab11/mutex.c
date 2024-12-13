@@ -8,16 +8,16 @@
 
 char shared_array[ARRAY_SIZE];
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_rwlock_t rwlock = PTHREAD_RWLOCK_INITIALIZER;
 
 void *writer_thread(void *arg)
 {
     for (int i = 0; i < ARRAY_SIZE - 1; i++)
     {
-        pthread_mutex_lock(&mutex);
+        pthread_rwlock_wrlock(&rwlock);
         shared_array[i] = 'a' + (i % 26);
         printf("Array updated\n");
-        pthread_mutex_unlock(&mutex);
+        pthread_rwlock_unlock(&rwlock);
         sleep(1);
     }
 
@@ -28,10 +28,11 @@ void *reader_thread(void *arg)
 {
     for (int i = 0; i < ARRAY_SIZE - 1; i++)
     {
-        pthread_mutex_lock(&mutex);
+        pthread_rwlock_rdlock(&rwlock);
         printf("Reader %ld reads array: %s\n", pthread_self(), shared_array);
-        pthread_mutex_unlock(&mutex);
-        usleep(1010000);
+        usleep(500000);
+        pthread_rwlock_unlock(&rwlock);
+        usleep(510000);
     }
     return NULL;
 }
@@ -64,7 +65,7 @@ int main()
         pthread_join(readers[i], NULL);
     }
 
-    pthread_mutex_destroy(&mutex);
+    pthread_rwlock_destroy(&rwlock);
 
     return 0;
 }

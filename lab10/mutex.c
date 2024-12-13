@@ -9,14 +9,17 @@
 char shared_array[ARRAY_SIZE];
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 void *writer_thread(void *arg)
 {
+    usleep(100000);
     for (int i = 0; i < ARRAY_SIZE - 1; i++)
     {
         pthread_mutex_lock(&mutex);
         shared_array[i] = 'a' + (i % 26);
         printf("Array updated\n");
+        pthread_cond_broadcast(&cond);
         pthread_mutex_unlock(&mutex);
         sleep(1);
     }
@@ -29,10 +32,12 @@ void *reader_thread(void *arg)
     for (int i = 0; i < ARRAY_SIZE - 1; i++)
     {
         pthread_mutex_lock(&mutex);
+        pthread_cond_wait(&cond, &mutex);
         printf("Reader %ld reads array: %s\n", pthread_self(), shared_array);
         pthread_mutex_unlock(&mutex);
-        usleep(1010000);
+        // usleep(1010000);
     }
+
     return NULL;
 }
 
