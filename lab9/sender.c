@@ -16,7 +16,8 @@
 #define SHMEM_FILE "shshshmemememe"
 
 int sem_id = -1;
-struct sembuf sem_lock = { 0, -1, 0 }, sem_open = { 0, 1, 0 };
+struct sembuf lock = {0, -1, 0};
+struct sembuf open = {0, 1, 0};
 
 char *addr = NULL;
 int shmid = -1;
@@ -89,7 +90,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    semop(sem_id, &sem_open, 1);
+    semop(sem_id, &open, 1);
 
     addr = shmat(shmid, NULL, 0);
     if (addr == (void *)-1)
@@ -112,10 +113,10 @@ int main(int argc, char **argv)
         strftime(timeStr, sizeof(timeStr), "%H:%M:%S;", &curTime);
         snprintf(result, sizeof(result), "Process: %d; %s", getpid(), timeStr);
 
-        semop(sem_id, &sem_lock, 1);
+        semop(sem_id, &lock, 1);
         strcpy(addr, result);
         sleep(1);
-        semop(sem_id, &sem_open, 1);
+        semop(sem_id, &open, 1);
     }
 
     return 0;

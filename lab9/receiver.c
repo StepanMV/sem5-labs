@@ -13,7 +13,8 @@
 #define SHMEM_FILE "shshshmemememe"
 
 char *shared_memory = NULL;
-struct sembuf sem_lock = { 0, -1, 0 }, sem_open = { 0, 1, 0 };
+struct sembuf lock = {0, -1, 0};
+struct sembuf open = {0, 1, 0};
 
 void handle_signal(int sig)
 {
@@ -46,7 +47,8 @@ int main()
     }
 
     int semid = semget(key, 1, 0666);
-    if (semid == -1) {
+    if (semid == -1)
+    {
         perror("semget() failed");
         return -1;
     }
@@ -65,9 +67,9 @@ int main()
 
     while (1)
     {
-        semop(semid, &sem_lock, 1);
+        semop(semid, &lock, 1);
         strcpy(local_copy, shared_memory);
-        semop(semid, &sem_open, 1);
+        semop(semid, &open, 1);
 
         time_t now = time(NULL);
         struct tm *current_time = localtime(&now);
