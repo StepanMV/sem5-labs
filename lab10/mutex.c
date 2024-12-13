@@ -17,7 +17,7 @@ void *writer_thread(void *arg)
     for (int i = 0; i < ARRAY_SIZE - 1; i++)
     {
         pthread_mutex_lock(&mutex);
-        shared_array[i] = 'a' + (i % 26);
+        shared_array[i] = '0' + i;
         printf("Array updated\n");
         pthread_cond_broadcast(&cond);
         pthread_mutex_unlock(&mutex);
