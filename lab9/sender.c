@@ -17,7 +17,7 @@
 
 int sem_id = -1;
 struct sembuf lock = {0, -1, 0};
-struct sembuf open = {0, 1, 0};
+struct sembuf not_open = {0, 1, 0};
 
 char *addr = NULL;
 int shmid = -1;
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    semop(sem_id, &open, 1);
+    semop(sem_id, &not_open, 1);
 
     addr = shmat(shmid, NULL, 0);
     if (addr == (void *)-1)
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
         semop(sem_id, &lock, 1);
         strcpy(addr, result);
         sleep(1);
-        semop(sem_id, &open, 1);
+        semop(sem_id, &not_open, 1);
     }
 
     return 0;
