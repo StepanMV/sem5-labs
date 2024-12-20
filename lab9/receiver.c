@@ -14,7 +14,7 @@
 
 char *shared_memory = NULL;
 struct sembuf lock = {0, -1, 0};
-struct sembuf open = {0, 1, 0};
+struct sembuf not_open = {0, 1, 0};
 
 void handle_signal(int sig)
 {
@@ -69,7 +69,7 @@ int main()
     {
         semop(semid, &lock, 1);
         strcpy(local_copy, shared_memory);
-        semop(semid, &open, 1);
+        semop(semid, &not_open, 1);
 
         time_t now = time(NULL);
         struct tm *current_time = localtime(&now);
